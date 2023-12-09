@@ -72,9 +72,9 @@ module "ec2" {
 
   vpc_id = module.vpc.vpc_id
 
-  cluster_enabled   = true
-  instance_ami      = module.data.ubuntu_20_04_amd64_ami_id
-  instance_type     = "t3a.small"
+  cluster_enabled = true
+  instance_ami    = module.data.ubuntu_20_04_amd64_ami_id
+  instance_type   = "t3a.small"
 
   autoscaling_min_size = "2"
   autoscaling_max_size = "2"

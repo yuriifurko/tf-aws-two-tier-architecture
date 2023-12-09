@@ -7,10 +7,6 @@ locals {
 
   project_name = "two-tier-arch"
   environment  = "dev"
-  profile      = "administrator-access-935454902317"
-  eks_version  = "1.26"
-
-  domain_name = format("%v.%v", local.environment, "dev.awsworkshop.info")
 
   tags = {
     Name          = "two-tier-arch"

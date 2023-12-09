@@ -7,7 +7,5 @@ terraform {
     key     = "two-tier-architecture/terraform.tfstate"
     region  = "us-east-1"
     profile = "administrator-access-935454902317"
-
-    dynamodb_table = "tfstate-lock-dev"
   }
 }

@@ -50,8 +50,8 @@ pipelines:
             - set -- $(aws sts assume-role-with-web-identity
               --role-arn ${IODC_IAM_ROLE_ARN}
               --role-session-name bitbucket-build-session
-              --web-identity-token $ID_TOKEN_1
-              --duration-seconds $CI_JOB_TIMEOUT
+              --web-identity-token $BITBUCKET_STEP_OIDC_TOKEN
+              --duration-seconds 1000
               --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]'
               --output text)
 

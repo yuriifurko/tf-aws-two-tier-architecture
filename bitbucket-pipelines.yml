@@ -54,13 +54,14 @@ pipelines:
 
       - step:
           name: Validate
-          image:
+          image: hashicorp/terraform
           script:
               - terraform init --upgrade
 
       - step:
           name: Deploy to Production
           deployment: Production
+          image: hashicorp/terraform
           trigger: manual
           script:
             - terraform init

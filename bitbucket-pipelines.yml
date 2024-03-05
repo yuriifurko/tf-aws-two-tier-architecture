@@ -59,7 +59,11 @@ pipelines:
             - export AWS_SESSION_TOKEN="$3"
             - export AWS_DEFAULT_REGION="us-east-1"
 
-            - aws s3 ls
+            - mkdir ~/.aws
+            - echo -e "[profile administrator-access-935454902317]\nrole_arn=${IODC_IAM_ROLE_ARN}\nweb_identity_token_file=/tmp/web_identity_token" >> ~/.aws/config
+            - aws sts get-caller-identity --profile administrator-access-935454902317 && cat ~/.aws/config
+
+            - aws s3 ls --profile administrator-access-935454902317
 
       - step:
           name: Validate

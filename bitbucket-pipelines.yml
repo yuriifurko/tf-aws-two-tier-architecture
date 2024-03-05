@@ -7,35 +7,41 @@
 # Prerequisites: credentials according to used cloud provider.
 # For advanced cases, please, follow terraform docs https://www.terraform.io/docs/index.html.
 
-
-image: hashicorp/terraform
-
 pipelines:
   default:
     - parallel:
         - step:
-            name: Test
+            name: Validate
+            image: hashicorp/terraform
             script:
-               - echo ""
-              #- terraform init --upgrade
-              #- terraform validate
+               - terraform fmt -recursive -check
+
+        - step:
+            name: Validate
+            image: ubuntu:latest
+            trigger: manual
+            script:
+               - wget "https://github.com/terraform-linters/tflint/releases/latest/download/tflint_linux_amd64.zip" -O tflint.zip
+               - unzip tflint.zip && mv tflint /usr/local/bin/ && tflint --version
+               - tflint --recursive --config "$(pwd)/.tflint.hcl"
+
+        - step:
+            name: Validate
+            image: bridgecrew/checkov:latest
+            trigger: manual
+            script:
+              - wget "https://github.com/liamg/tfsec/releases/latest/download/tfsec-linux-amd64" -O tfsec
+              - chmod +x tfsec && mv tfsec /usr/local/bin/ && tfsec --version
+              - tfsec .
+
         - step:
             name: Security Scan
             script:
-              # Run a security scan for sensitive data.
-              # See more security tools at https://bitbucket.org/product/features/pipelines/integrations?&category=security
               - pipe: atlassian/git-secrets-scan:0.5.1
+
   branches:
     master:
       - step:
-          name: Security Scan
-          script:
-            # Run a security scan for sensitive data.
-            # See more security tools at https://bitbucket.org/product/features/pipelines/integrations?&category=security
-            - pipe: atlassian/git-secrets-scan:0.5.1
-
-      - step:
-          # https://support.atlassian.com/bitbucket-cloud/docs/integrate-pipelines-with-resource-servers-using-oidc/
           oidc: true
           image: amazon/aws-cli
           max-time: 5
@@ -45,6 +51,12 @@ pipelines:
               --role-session-name bitbucket-build-session
               --web-identity-token "$BITBUCKET_STEP_OIDC_TOKEN"
               --duration-seconds 1000
+
+      - step:
+          name: Validate
+          image:
+          script:
+              - terraform init --upgrade
 
       - step:
           name: Deploy to Production

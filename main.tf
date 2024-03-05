@@ -107,11 +107,12 @@ module "ec2" {
   vpc_id = module.vpc.vpc_id
 
   cluster_enabled = true
-  instance_ami    = module.data.ubuntu_20_04_amd64_ami_id
-  instance_type   = "t3a.small"
 
-  autoscaling_min_size = "2"
-  autoscaling_max_size = "2"
+  instance_ami  = module.data.ubuntu_20_04_amd64_ami_id
+  instance_type = "t3a.small"
+
+  autoscaling_min_size = 2
+  autoscaling_max_size = 2
 
   autoscaling_zone_identifier = module.vpc.vpc_private_subnets_id
 
@@ -123,9 +124,12 @@ module "ec2" {
     module.frontent_security_group.security_group_id
   ]
 
-  user_data = base64encode(templatefile(format("%v/user-data/default.sh.tpl", path.module),{
-      name = "Jonh Smith"
-    })
+  user_data = base64encode(
+    templatefile(format("%v/user-data/default.sh.tpl", path.module),
+      {
+        name = "Jonh Smith"
+      }
+    )
   )
 
   tags = local.tags
@@ -137,17 +141,17 @@ module "ec2" {
 }
 
 
-# module "route53" {
-#   source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-route53-records.git?ref=master"
+module "route53" {
+  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-route53-records.git?ref=master"
 
-#   route53_domain_name = "dev.awsworkshop.info"
+  route53_domain_name = "dev.awsworkshop.info"
 
-#   route53_domain_records = {
-#     "two-tier" = {
-#       name   = "two-tier"
-#       type   = upper("cname")
-#       ttl    = 300
-#       record = module.alb.lb_dns_name
-#     }
-#   }
-# }
+  route53_domain_records = {
+    "two-tier" = {
+      name   = "two-tier"
+      type   = upper("cname")
+      ttl    = 300
+      record = module.alb.lb_dns_name
+    }
+  }
+}

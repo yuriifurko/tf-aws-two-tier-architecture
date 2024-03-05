@@ -3,7 +3,7 @@ stages:
   - auth
 
 .mng_variables: &mng_variables
-  ACCOUNT_ID: "041356085284"
+  ACCOUNT_ID: ""
   GITLAB_ROLE_NAME: "oidc-provider/gitlab.com"
 
 .aws_auth: &aws_auth

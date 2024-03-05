@@ -5,6 +5,12 @@ AWS TWO-TIER-ARCHITECTURE
 
 ![img](images/two-tier-architecture.gif)
 
+## Build and Verify docker container
+
+```bash
+docker run --rm -it $(docker build -q .) sh -c "whoami; pg_versions -v; git version"
+```
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -51,3 +57,17 @@ No inputs.
 
 No outputs.
 <!-- END_TF_DOCS -->
+
+
+
+
+
+             - export AWS_REGION=ap-south-1
+             - export AWS_ROLE_ARN=arn:aws:iam::XXXXXXXXXXXX:role/master-oidc-role
+             - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token 
+             - echo $BITBUCKET_STEP_OIDC_TOKEN > $(pwd)/web-identity-token     
+             - aws sts get-caller-identity
+             - aws s3 ls s3://master-oidc-s3        
+             - export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s" $(aws sts assume-role --role-arn arn:aws:iam::XXXXXXXXXXXX:role/dev-oidc-role --role-session-name MySessionName --query "Credentials.[AccessKeyId,SecretAccessKey,SessionToken]" --output text))
+             - aws sts get-caller-identity
+             - aws s3 ls s3://dev-oidc-s3

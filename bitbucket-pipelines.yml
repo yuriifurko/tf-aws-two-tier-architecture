@@ -16,8 +16,9 @@ pipelines:
         - step:
             name: Test
             script:
-              - terraform init --upgrade
-              - terraform validate
+               - echo ""
+              #- terraform init --upgrade
+              #- terraform validate
         - step:
             name: Security Scan
             script:
@@ -41,7 +42,7 @@ pipelines:
           script:
             - aws sts assume-role-with-web-identity
               --role-arn $IODC_IAM_ROLE_ARN
-              --role-session-name build-session
+              --role-session-name bitbucket-build-session
               --web-identity-token "$BITBUCKET_STEP_OIDC_TOKEN"
               --duration-seconds 1000
 

@@ -39,10 +39,10 @@ pipelines:
           image: amazon/aws-cli
           max-time: 5
           script:
-            - aws sts assume-role-with-web-identity \
-              --role-arn $IODC_IAM_ROLE_ARN \
-              --role-session-name build-session  \
-              --web-identity-token "$BITBUCKET_STEP_OIDC_TOKEN" \
+            - aws sts assume-role-with-web-identity
+              --role-arn $IODC_IAM_ROLE_ARN
+              --role-session-name build-session
+              --web-identity-token "$BITBUCKET_STEP_OIDC_TOKEN"
               --duration-seconds 1000
 
       - step:

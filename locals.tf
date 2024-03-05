@@ -9,8 +9,8 @@ locals {
   environment  = "dev"
 
   tags = {
-    Name          = "two-tier-arch"
-    Environment   = "dev"
+    Name          = local.project_name
+    Environment   = local.environment
     OwnerFullName = "Yurii Furko"
     OwnerEmail    = "yurii.furko@gmail.com"
     ManagedBy     = "Terraform"

@@ -62,27 +62,18 @@ module "alb" {
   tags = local.tags
 }
 
-module "ec2" {
-  #source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-ec2-service.git?ref=master"
-  source = "/Users/yuriifurko/Documents/Cloud/aws/tf-aws-ec2-service"
+module "frontent_security_group" {
+  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-security-group.git?ref=master"
 
   project_name = local.project_name
   environment  = local.environment
-  region       = local.region
+
+  security_group_name        = format("%v-%v-%v", local.project_name, local.environment, "frontent")
+  security_group_description = "Default kuberentes worker security group"
 
   vpc_id = module.vpc.vpc_id
 
-  cluster_enabled = true
-  instance_ami    = module.data.ubuntu_20_04_amd64_ami_id
-  instance_type   = "t3a.small"
-
-  autoscaling_min_size = "2"
-  autoscaling_max_size = "2"
-
-  autoscaling_zone_identifier   = module.vpc.vpc_private_subnets_id
-  autoscaling_target_group_arns = [module.alb.lb_target_group_arn]
-
-  security_group_ingress_cidr_blocks = {
+  security_group_ingress_rules = {
     "80" = {
       "description" = "Allow http ingress traffic from alb"
       "cidrs" = [
@@ -94,7 +85,48 @@ module "ec2" {
     }
   }
 
-  user_data = base64encode(templatefile("${path.module}/user-data/default.sh.tpl", {}))
+  security_group_egress_rules = {
+    "all" = {
+      "description" = "Allow outbount access to the Internet"
+      "cidrs" = [
+        "0.0.0.0/0"
+      ]
+      "from_port" = 0
+      "to_port"   = 0
+      "protocol"  = "tcp"
+    }
+  }
+}
+
+module "ec2" {
+  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-ec2-service.git?ref=master"
+
+  project_name = local.project_name
+  environment  = local.environment
+
+  vpc_id = module.vpc.vpc_id
+
+  cluster_enabled = true
+  instance_ami    = module.data.ubuntu_20_04_amd64_ami_id
+  instance_type   = "t3a.small"
+
+  autoscaling_min_size = "2"
+  autoscaling_max_size = "2"
+
+  autoscaling_zone_identifier = module.vpc.vpc_private_subnets_id
+
+  autoscaling_target_group_arns = [
+    module.alb.lb_target_group_arn
+  ]
+
+  vpc_security_group_ids = [
+    module.frontent_security_group.security_group_id
+  ]
+
+  user_data = base64encode(templatefile(format("%v/user-data/default.sh.tpl", path.module),{
+      name = "Jonh Smith"
+    })
+  )
 
   tags = local.tags
 
@@ -105,17 +137,17 @@ module "ec2" {
 }
 
 
-module "route53" {
-  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-route53-records.git?ref=master"
+# module "route53" {
+#   source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-route53-records.git?ref=master"
 
-  route53_domain_name = "dev.awsworkshop.info"
+#   route53_domain_name = "dev.awsworkshop.info"
 
-  route53_domain_records = {
-    "two-tier" = {
-      name   = "two-tier"
-      type   = upper("cname")
-      ttl    = 300
-      record = module.alb.lb_dns_name
-    }
-  }
-}
+#   route53_domain_records = {
+#     "two-tier" = {
+#       name   = "two-tier"
+#       type   = upper("cname")
+#       ttl    = 300
+#       record = module.alb.lb_dns_name
+#     }
+#   }
+# }

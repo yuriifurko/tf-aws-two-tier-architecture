@@ -60,7 +60,7 @@ pipelines:
             - export AWS_SESSION_TOKEN="$3"
             - export AWS_DEFAULT_REGION="us-east-1"
 
-            - echo -e ""Check access from managment account"
+            - echo -e "Check access from managment account"
             - aws s3 ls
 
             - echo -e "Assume role from development account"

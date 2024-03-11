@@ -69,7 +69,7 @@ module "frontent_security_group" {
   environment  = local.environment
 
   security_group_name        = format("%v-%v-%v", local.project_name, local.environment, "frontent")
-  security_group_description = "Default kuberentes worker security group"
+  security_group_description = "Default frontend security group"
 
   vpc_id = module.vpc.vpc_id
 

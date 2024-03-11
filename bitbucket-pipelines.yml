@@ -31,6 +31,38 @@ pipelines:
               - pipe: atlassian/git-secrets-scan:0.5.1
 
   branches:
+    '{master,develop}':
+      - step:
+          name: Run Infracost on default branch and update Infracost Cloud
+          image: infracost/infracost:ci-0.10
+          script:
+          - |
+            infracost breakdown \
+              --path=. \
+              --format=json \
+              --out-file=/tmp/infracost.json
+
+            infracost upload --path=/tmp/infracost.json || echo "Always pass main branch runs even if there are policy failures"
+
+      - step:
+          name: Update PR status in Infracost Cloud
+          image: infracost/infracost:ci-0.10
+          script:
+          - |
+            PATTERN="pull request #([0-9]+)"
+            if [[ "$(git show $BITBUCKET_COMMIT)" =~ $PATTERN ]]; then
+              PR_ID=${BASH_REMATCH[1]}
+              echo "Updating status of $PR_ID"
+
+              curl \
+                --request POST \
+                --header "Content-Type: application/json" \
+                --header "X-API-Key: ${INFRACOST_API_KEY}" \
+                --data "{ \"query\": \"mutation { updatePullRequestStatus(url: \\\"${BITBUCKET_GIT_HTTP_ORIGIN}/pull-requests/${PR_ID}\\\", status: MERGED) }\" }" \
+                "https://dashboard.api.infracost.io/graphql"
+            else
+              echo "Nothing to do as the commit message did not contain a merged PR ID."
+            fi
     master:
       - step:
           oidc: true

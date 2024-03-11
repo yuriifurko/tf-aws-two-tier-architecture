@@ -5,10 +5,18 @@ AWS TWO-TIER-ARCHITECTURE
 
 ![img](images/two-tier-architecture.gif)
 
-## Build and Verify docker container
+### Build and Verify docker container
 
 ```bash
 docker run --rm -it $(docker build -q .) sh -c "whoami; pg_versions -v; git version"
+```
+
+### Infracost
+
+[Sample](https://bitbucket.org/infracost/infracost-bitbucket-pipeline/src/master/)
+
+```bash
+infracost breakdown --path .
 ```
 
 <!-- BEGIN_TF_DOCS -->
@@ -37,6 +45,7 @@ docker run --rm -it $(docker build -q .) sh -c "whoami; pg_versions -v; git vers
 | <a name="module_data"></a> [data](#module\_data) | git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-data-sources.git | master |
 | <a name="module_ec2"></a> [ec2](#module\_ec2) | git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-ec2-service.git | master |
 | <a name="module_frontent_security_group"></a> [frontent\_security\_group](#module\_frontent\_security\_group) | git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-security-group.git | master |
+| <a name="module_route53"></a> [route53](#module\_route53) | git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-route53-records.git | v1.0.0 |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-vpc-network.git | v1.0.1 |
 
 ## Resources
@@ -57,17 +66,3 @@ No inputs.
 
 No outputs.
 <!-- END_TF_DOCS -->
-
-
-
-
-
-             - export AWS_REGION=ap-south-1
-             - export AWS_ROLE_ARN=arn:aws:iam::XXXXXXXXXXXX:role/master-oidc-role
-             - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token 
-             - echo $BITBUCKET_STEP_OIDC_TOKEN > $(pwd)/web-identity-token     
-             - aws sts get-caller-identity
-             - aws s3 ls s3://master-oidc-s3        
-             - export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s" $(aws sts assume-role --role-arn arn:aws:iam::XXXXXXXXXXXX:role/dev-oidc-role --role-session-name MySessionName --query "Credentials.[AccessKeyId,SecretAccessKey,SessionToken]" --output text))
-             - aws sts get-caller-identity
-             - aws s3 ls s3://dev-oidc-s3

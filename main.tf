@@ -69,7 +69,7 @@ module "frontent_security_group" {
   environment  = local.environment
 
   security_group_name        = format("%v-%v-%v", local.project_name, local.environment, "frontent")
-  security_group_description = "Default kuberentes worker security group"
+  security_group_description = "Default frontend security group"
 
   vpc_id = module.vpc.vpc_id
 
@@ -109,7 +109,7 @@ module "ec2" {
   cluster_enabled = true
 
   instance_ami  = module.data.ubuntu_20_04_amd64_ami_id
-  instance_type = "t3a.small"
+  instance_type = var.instance_type
 
   autoscaling_min_size = 2
   autoscaling_max_size = 2
@@ -142,7 +142,7 @@ module "ec2" {
 
 
 module "route53" {
-  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-route53-records.git?ref=master"
+  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-route53-records.git?ref=v1.0.0"
 
   route53_domain_name = "dev.awsworkshop.info"
 

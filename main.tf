@@ -109,7 +109,7 @@ module "ec2" {
   cluster_enabled = true
 
   instance_ami  = module.data.ubuntu_20_04_amd64_ami_id
-  instance_type = "t3a.micro"
+  instance_type = var.instance_type
 
   autoscaling_min_size = 2
   autoscaling_max_size = 2

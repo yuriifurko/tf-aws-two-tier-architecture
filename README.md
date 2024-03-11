@@ -37,6 +37,7 @@ docker run --rm -it $(docker build -q .) sh -c "whoami; pg_versions -v; git vers
 | <a name="module_data"></a> [data](#module\_data) | git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-data-sources.git | master |
 | <a name="module_ec2"></a> [ec2](#module\_ec2) | git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-ec2-service.git | master |
 | <a name="module_frontent_security_group"></a> [frontent\_security\_group](#module\_frontent\_security\_group) | git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-security-group.git | master |
+| <a name="module_route53"></a> [route53](#module\_route53) | git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-route53-records.git | master |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-vpc-network.git | v1.0.1 |
 
 ## Resources

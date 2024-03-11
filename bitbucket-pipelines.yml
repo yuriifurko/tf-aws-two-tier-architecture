@@ -1,12 +1,3 @@
-# Template Terraform to deploy to Cloud Infrastructure
-
-# This template allows you to deploy your infrastructure using Terraform to supported cloud providers.
-# The workflow allows running tests, security scans on feature branches (as well as master).
-# After merging code to master the infrastructure will be deployed to cloud according to the given terraform template.
-
-# Prerequisites: credentials according to used cloud provider.
-# For advanced cases, please, follow terraform docs https://www.terraform.io/docs/index.html.
-
 pipelines:
   default:
     - parallel:
@@ -38,62 +29,6 @@ pipelines:
             name: Security Scan
             script:
               - pipe: atlassian/git-secrets-scan:0.5.1
-
-  pull-requests:
-    '**':
-      - step:
-          name: Run Infracost on pull requests to check costs and policies
-          # Always use the latest 0.10.x version to pick up bug fixes and new resources.
-          image: infracost/infracost:ci-0.10
-          script:
-            # Clone the base branch of the pull request (e.g. main/master) into a temp directory.
-            # You may want to use $BITBUCKET_GIT_SSH_ORIGIN if you're using a private repository
-            - git clone $BITBUCKET_GIT_HTTP_ORIGIN --branch=$BITBUCKET_PR_DESTINATION_BRANCH --single-branch /tmp/base
-
-            # If you use private modules, add an environment variable or secret
-            # called GIT_SSH_KEY with your private key, so Infracost can access
-            # private repositories (similar to how Terraform/Terragrunt does).
-            # - |
-            #   mkdir -p ~/.ssh
-            #   eval `ssh-agent -s`
-            #   echo "$GIT_SSH_KEY" | tr -d '\r' | ssh-add -
-            #   # Update this to github.com, gitlab.com, bitbucket.org, ssh.dev.azure.com or your source control server's domain
-            #   ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
-
-            # Generate an Infracost cost estimate baseline from the comparison branch, so that Infracost can compare the cost difference.
-            - |
-              infracost breakdown --path=/tmp/base \
-                                  --format=json \
-                                  --out-file=infracost-base.json
-
-            # Generate an Infracost diff and save it to a JSON file.
-            - |
-              infracost diff --path=. \
-                            --compare-to=infracost-base.json \
-                            --format=json \
-                            --out-file=infracost.json
-
-            # Posts a comment to the PR using the 'update' behavior.
-            # This creates a single comment and updates it. The "quietest" option.
-            # The other valid behaviors are:
-            #   delete-and-new - Delete previous comments and create a new one.
-            #   new - Create a new cost estimate comment on every push.
-            # For Bitbucket Cloud:
-            #   If you're using a User token or App password:
-            #     use --bitbucket-token=myusername:$BITBUCKET_TOKEN, where the token can be a User token or App password.
-            #   If you're using a Repository access token:
-            #     use --bitbucket-token=$BITBUCKET_TOKEN
-            # For Bitbucket Server:
-            #   use --bitbucket-token=$BITBUCKET_TOKEN with your HTTP access token.
-            #   use --bitbucket-server-url=https://your-bitbucket-server.com to override the default https://bitbucket.org.
-            # See https://www.infracost.io/docs/features/cli_commands/#comment-on-pull-requests for other options
-            #   including --exclude-cli-output that posts only the summary table.
-            - |
-              infracost comment bitbucket --path=infracost.json \
-                                          --repo=$BITBUCKET_WORKSPACE/$BITBUCKET_REPO_SLUG \
-                                          --pull-request=$BITBUCKET_PR_ID \
-                                          --bitbucket-token=alikhajeh1:$BITBUCKET_TOKEN \
-                                          --behavior=update
 
   branches:
     master:

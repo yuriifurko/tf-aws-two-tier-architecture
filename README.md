@@ -1,6 +1,8 @@
 AWS TWO-TIER-ARCHITECTURE
 ===
 
+[![infracost](https://img.shields.io/endpoint?url=https://dashboard.api.infracost.io/shields/json/8723beef-8264-44c0-9e96-26b3d0f5f9c3/repos/c2bc1327-c4d7-485f-9c38-3e7312dfcb7d/branch/a72f35d6-693d-4acf-af6c-69885491cd0d/yuriyfRnD%252Ftf-aws-two-tier-architecture)](https://dashboard.infracost.io/org/yuriifurko/repos/c2bc1327-c4d7-485f-9c38-3e7312dfcb7d?tab=settings)
+
 ## 🏠 Architecture
 
 ![img](images/two-tier-architecture.gif)

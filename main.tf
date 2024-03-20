@@ -1,5 +1,5 @@
 module "data" {
-  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-data-sources.git?ref=master"
+  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-data-sources.git?ref=v1.0.0"
 }
 
 module "vpc" {
@@ -7,7 +7,8 @@ module "vpc" {
 
   project_name = local.project_name
   environment  = local.environment
-  region       = local.region
+
+  region = module.data.region
 
   vpc_cidr            = local.vpc_cidr
   availability_zones  = local.azs
@@ -23,7 +24,7 @@ module "vpc" {
 }
 
 module "alb" {
-  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-load-balancer.git?ref=master"
+  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-load-balancer.git?ref=v1.0.0"
 
   project_name = local.project_name
   environment  = local.environment
@@ -63,7 +64,7 @@ module "alb" {
 }
 
 module "frontent_security_group" {
-  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-security-group.git?ref=master"
+  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-security-group.git?ref=v1.0.0"
 
   project_name = local.project_name
   environment  = local.environment
@@ -99,7 +100,7 @@ module "frontent_security_group" {
 }
 
 module "ec2" {
-  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-ec2-service.git?ref=master"
+  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-ec2-service.git?ref=v1.0.0"
 
   project_name = local.project_name
   environment  = local.environment

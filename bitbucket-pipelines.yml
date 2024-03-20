@@ -63,7 +63,7 @@ pipelines:
             else
               echo "Nothing to do as the commit message did not contain a merged PR ID."
             fi
-    master:
+
       - step:
           oidc: true
           image: amazon/aws-cli

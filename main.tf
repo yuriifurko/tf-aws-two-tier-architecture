@@ -43,7 +43,7 @@ module "alb" {
     "80" = {
       "description" = "Allow http ingress traffic"
       "cidrs" = [
-        "0.0.0.0/0"
+        format("%v/32", chomp(data.http.myip.response_body))
       ]
       "from_port" = 80
       "to_port"   = 80
@@ -52,7 +52,7 @@ module "alb" {
     "443" = {
       "description" = "Allow https ingress traffic"
       "cidrs" = [
-        "0.0.0.0/0"
+        format("%v/32", chomp(data.http.myip.response_body))
       ]
       "from_port" = 443
       "to_port"   = 443
@@ -141,11 +141,10 @@ module "ec2" {
   ]
 }
 
-
 module "route53" {
   source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-route53-records.git?ref=v1.0.0"
 
-  route53_domain_name = "dev.awsworkshop.info"
+  route53_domain_name = data.aws_route53_zone.main.name
 
   route53_domain_records = {
     "two-tier" = {

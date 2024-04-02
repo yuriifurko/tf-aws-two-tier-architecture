@@ -1,4 +1,5 @@
 #!/bin/bash
+clear
 
 echo -e "Generate README"
 terraform-docs markdown table --output-file README.md .

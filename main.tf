@@ -1,5 +1,5 @@
 module "data" {
-  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-data-sources.git?ref=master"
+  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-data-sources.git?ref=v1.0.0"
 }
 
 module "vpc" {
@@ -7,7 +7,8 @@ module "vpc" {
 
   project_name = local.project_name
   environment  = local.environment
-  region       = local.region
+
+  region = module.data.region
 
   vpc_cidr            = local.vpc_cidr
   availability_zones  = local.azs
@@ -23,7 +24,7 @@ module "vpc" {
 }
 
 module "alb" {
-  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-load-balancer.git?ref=master"
+  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-load-balancer.git?ref=v1.0.0"
 
   project_name = local.project_name
   environment  = local.environment
@@ -42,7 +43,7 @@ module "alb" {
     "80" = {
       "description" = "Allow http ingress traffic"
       "cidrs" = [
-        "0.0.0.0/0"
+        format("%v/32", chomp(data.http.myip.response_body))
       ]
       "from_port" = 80
       "to_port"   = 80
@@ -51,7 +52,7 @@ module "alb" {
     "443" = {
       "description" = "Allow https ingress traffic"
       "cidrs" = [
-        "0.0.0.0/0"
+        format("%v/32", chomp(data.http.myip.response_body))
       ]
       "from_port" = 443
       "to_port"   = 443
@@ -63,7 +64,7 @@ module "alb" {
 }
 
 module "frontent_security_group" {
-  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-security-group.git?ref=master"
+  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-security-group.git?ref=v1.0.0"
 
   project_name = local.project_name
   environment  = local.environment
@@ -99,7 +100,7 @@ module "frontent_security_group" {
 }
 
 module "ec2" {
-  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-ec2-service.git?ref=master"
+  source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-ec2-service.git?ref=v1.0.0"
 
   project_name = local.project_name
   environment  = local.environment
@@ -140,11 +141,10 @@ module "ec2" {
   ]
 }
 
-
 module "route53" {
   source = "git::ssh://yurii-furko@bitbucket.org/yuriyfRnD/tf-aws-route53-records.git?ref=v1.0.0"
 
-  route53_domain_name = "dev.awsworkshop.info"
+  route53_domain_name = data.aws_route53_zone.main.name
 
   route53_domain_records = {
     "two-tier" = {

@@ -5,7 +5,7 @@ AWS TWO-TIER-ARCHITECTURE
 
 ## 🏠 Architecture
 
-![img](images/two-tier-architecture.gif)
+![img](images/arch.drawio.png)
 
 ### Build and Verify docker container
 

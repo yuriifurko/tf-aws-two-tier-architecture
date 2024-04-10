@@ -1,0 +1,111 @@
+---
+name: "Terraform CI/CD to AWS"
+env:
+  AWS_REGION: "eu-central-1"
+  AWS_ROLE_ARN: "arn:aws:iam::<id-of-tooling-account>:role/GitHubAction-AssumeRoleWithAction"  # Replace
+  AWS_WEB_IDENTITY_TOKEN_FILE: "/tmp/web_identity_token_file"
+  TF_VERSION: "1.6.0"
+
+"on":
+  pull_request:
+  push:
+    branches:
+      - main
+
+# Permission can be added at job level or workflow level
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
+jobs:
+  Terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: { dir: ['aws-accounts/tooling', 'aws-accounts/workload-prod-01'] }               # Replace, declare folder(s) to traverse
+    #env:
+    #  working-directory: aws-accounts/tooling
+    steps:
+      - name: Get OIDC Token
+        id: get_oidc_token
+        run: |
+          curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' > /tmp/web_identity_token_file
+          mkdir ~/.aws
+          echo -e "[profile cicd]\nrole_arn=${AWS_ROLE_ARN}\nweb_identity_token_file=${AWS_WEB_IDENTITY_TOKEN_FILE}" >> ~/.aws/config
+          aws sts get-caller-identity --profile cicd
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform format
+        id: fmt
+        run: terraform fmt -check
+        working-directory: ${{ matrix.dir }}
+        continue-on-error: true
+
+      - name: Terraform init
+        id: init
+        run: terraform init
+        working-directory: ${{ matrix.dir }}
+
+      - name: Terraform validate
+        id: validate
+        run: terraform validate
+        working-directory: ${{ matrix.dir }}
+
+      - name: Terraform plan
+        id: plan
+        run: terraform plan -no-color -input=false -refresh=true -detailed-exitcode
+        working-directory: ${{ matrix.dir }}
+
+      - name: Checkov GitHub Action
+        uses: bridgecrewio/checkov-action@v12.1347.0
+        with:
+          directory: ${{ matrix.dir }}
+          # Run scan on all checks but a specific check identifier (comma separated)
+          # skip_check: # optional
+          download_external_modules: false
+          quiet: true
+          soft_fail: true    # Replace to false to break on errors
+
+      - name: Plan output
+        id: output
+        uses: actions/github-script@v3
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            ### Workspace
+
+            \`${process.env.TF_WORKSPACE}\`
+
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            <details><summary>Show Plan</summary>
+
+            \`\`\`hcl
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>
+
+            **Pusher**: @${{ github.actor }}
+            **Action**: ${{ github.event_name }}
+            `;
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+      - name: Terraform apply
+        id: apply
+        run: terraform apply -input=false -auto-approve
+        working-directory: ${{ matrix.dir }}

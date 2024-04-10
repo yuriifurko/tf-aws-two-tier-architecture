@@ -23,7 +23,7 @@ infracost generate config --repo-path=. --template-path=infracost.yml.tmpl --out
 
 # breakdown
 infracost breakdown --path . --usage-file=infracost.yml
-infracost breakdown --config-file=infracost.yml --format=json --out-file=infracost-base.json
+infracost breakdown --config-file=infracost.yml --format=table --out-file=infracost-base.table
 ```
 
 ### Terraform Cloud

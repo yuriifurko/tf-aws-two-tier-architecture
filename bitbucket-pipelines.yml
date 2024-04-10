@@ -3,27 +3,18 @@ pipelines:
     - parallel:
         - step:
             name: Validate
-            image: hashicorp/terraform
+            image: hashicorp/terraform:1.7.5
             script:
                - terraform fmt -recursive -check
 
         - step:
             name: Validate
-            image: ubuntu:latest
+            image: ubuntu:jammy-20240227
             trigger: manual
             script:
                - wget "https://github.com/terraform-linters/tflint/releases/latest/download/tflint_linux_amd64.zip" -O tflint.zip
                - unzip tflint.zip && mv tflint /usr/local/bin/ && tflint --version
                - tflint --recursive --config "$(pwd)/.tflint.hcl"
-
-        - step:
-            name: Validate
-            image: bridgecrew/checkov:latest
-            trigger: manual
-            script:
-              - wget "https://github.com/liamg/tfsec/releases/latest/download/tfsec-linux-amd64" -O tfsec
-              - chmod +x tfsec && mv tfsec /usr/local/bin/ && tfsec --version
-              - tfsec .
 
         - step:
             name: Security Scan
@@ -65,8 +56,20 @@ pipelines:
             fi
 
       - step:
+          name: Infrastructure as code static analysis
+          image:
+            name: bridgecrew/checkov:3.2.55
+            entrypoint:
+              - '/usr/bin/env'
+              - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+          trigger: manual
+          script:
+            - checkov -d .
+
+      - step:
+          name: IODC autorization
           oidc: true
-          image: amazon/aws-cli
+          image: amazon/aws-cli:2.15.36
           max-time: 5
           script:
             - echo "role - ${IODC_IAM_ROLE_ARN}"
@@ -101,15 +104,15 @@ pipelines:
 
       - step:
           name: Validate
-          image: hashicorp/terraform
+          image: hashicorp/terraform:1.7.5
           trigger: manual
           script:
-            - terraform init --upgrade
+            - terraform init --upgrade -migrate-state && terraform validate
 
       - step:
           name: Deploy to Production
           deployment: Production
-          image: hashicorp/terraform
+          image: hashicorp/terraform:1.7.5
           trigger: manual
           script:
             - terraform init

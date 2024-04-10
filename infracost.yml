@@ -1,10 +1,14 @@
+# Dynamic
+# https://www.infracost.io/docs/features/config_file/
+
 version: 0.1
+
 projects:
     - path: .
-      name: dev
+      name: development
       terraform_var_files:
-        - environment/dev.tfvars
+        - environment/development.tfvars
     - path: .
-      name: prod
+      name: production
       terraform_var_files:
-        - environment/prod.tfvars
+        - environment/production.tfvars

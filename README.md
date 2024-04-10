@@ -18,8 +18,17 @@ docker run --rm -it $(docker build -q .) sh -c "whoami; pg_versions -v; git vers
 [Sample](https://bitbucket.org/infracost/infracost-bitbucket-pipeline/src/master/)
 
 ```bash
-infracost breakdown --path .
+# generate
+infracost generate config --repo-path=. --template-path=infracost.yml.tmpl --out-file=infracost.yml
+
+# breakdown
+infracost breakdown --path . --usage-file=infracost.yml
+infracost breakdown --config-file=infracost.yml --format=json --out-file=infracost-base.json
 ```
+
+### Terraform Cloud
+
+[Configuring Bitbucket Cloud Access](https://developer.hashicorp.com/terraform/cloud-docs/vcs/bitbucket-cloud)
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

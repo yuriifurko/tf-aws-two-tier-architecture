@@ -1,4 +1,8 @@
+# Dynamic
+# https://www.infracost.io/docs/features/config_file/
+
 version: 0.1
+
 projects:
 {{- range $project := matchPaths "environment/:env.tfvars" }}
   {{- if ne $project.env "legacy"}}

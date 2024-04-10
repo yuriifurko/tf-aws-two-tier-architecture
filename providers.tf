@@ -1,6 +1,13 @@
 provider "aws" {
   region  = "us-east-1"
-  profile = "administrator-access-935454902317"
+  profile = "administrator-access-041356085284"
+
+  skip_credentials_validation = true
+  skip_requesting_account_id  = true
+
+  assume_role {
+    role_arn = "arn:aws:iam::${lookup(local.account_mapping, local.environment)}:role/terraform-execution-full-access"
+  }
 }
 
 terraform {

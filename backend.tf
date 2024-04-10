@@ -6,6 +6,10 @@ terraform {
     bucket  = "935454902317-terraform-dev"
     key     = "two-tier-architecture/terraform.tfstate"
     region  = "us-east-1"
-    profile = "administrator-access-935454902317"
+    profile = "administrator-access-041356085284"
+
+    assume_role = {
+      role_arn = "arn:aws:iam::935454902317:role/terraform-execution-full-access"
+    }
   }
 }

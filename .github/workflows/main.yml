@@ -10,7 +10,7 @@ env:
   pull_request:
   push:
     branches:
-      - main
+      - master
 
 # Permission can be added at job level or workflow level
 permissions:

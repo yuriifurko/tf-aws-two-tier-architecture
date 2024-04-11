@@ -81,15 +81,15 @@ aws_auth:
   #rules:
   #  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "schedule"
 
-# plan:
-#   stage: plan
-#   image:
-#     name: yuriyf/tf-aws-k8s:1.0.0
-#     entrypoint: [""]
-#   # use tags for private gitlab-runner
-#   #tags:
-#   #  - terraform
-#   extends:
-#     - .auth_before_script
-#   script:
-#     - terraform init --upgrade -migrate-state && terraform validate
+plan:
+  stage: plan
+  image:
+    name: yuriyf/tf-aws-k8s:1.0.0
+    entrypoint: [""]
+  # use tags for private gitlab-runner
+  #tags:
+  #  - terraform
+  extends:
+    - .auth_before_script
+  script:
+    - terraform init --upgrade -migrate-state && terraform validate

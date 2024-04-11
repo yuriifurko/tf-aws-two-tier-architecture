@@ -1,10 +1,10 @@
 ---
 name: "Terraform CI/CD to AWS"
 env:
-  AWS_REGION: "eu-central-1"
-  AWS_ROLE_ARN: "arn:aws:iam::<id-of-tooling-account>:role/GitHubAction-AssumeRoleWithAction"  # Replace
+  AWS_REGION: "us-east-1"
+  AWS_ROLE_ARN: "arn:aws:iam::041356085284:role/identity-provider-github-assume-role"  # Replace
   AWS_WEB_IDENTITY_TOKEN_FILE: "/tmp/web_identity_token_file"
-  TF_VERSION: "1.6.0"
+  TF_VERSION: "1.8.0"
 
 "on":
   pull_request:

@@ -32,6 +32,10 @@ stages:
   - aws sts get-caller-identity
   - aws s3 ls
 
+  - mkdir -p ~/.aws
+  - echo "${ID_TOKEN_1}" > /tmp/web_identity_token
+  - echo -e "[profile administrator-access-041356085284]\nrole_arn=${MASTER_IODC_ROLE_ARN}\nweb_identity_token_file=/tmp/web_identity_token" > ~/.aws/config
+
 .auth_before_script:
   id_tokens:
     ID_TOKEN_1:

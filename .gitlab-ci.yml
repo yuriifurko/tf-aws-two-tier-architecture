@@ -20,6 +20,7 @@ stages:
     --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]'
     --output text))
   - aws sts get-caller-identity
+  - aws s3 ls
 
 checkov:
   # https://www.checkov.io/4.Integrations/GitLab%20CI.html

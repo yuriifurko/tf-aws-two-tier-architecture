@@ -85,8 +85,9 @@ plan:
   image:
     name: yuriyf/tf-aws-k8s:1.0.0
     entrypoint: [""]
-  tags:
-    - terraform
+  # use tags for private gitlab-runner
+  #tags:
+  #  - terraform
   extends:
     - .auth_before_script
   script:

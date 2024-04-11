@@ -96,4 +96,5 @@ plan:
   extends:
     - .auth_before_script
   script:
-    - terraform init --upgrade -migrate-state && terraform validate
+    - terraform init --upgrade -migrate-state
+    - terraform validate

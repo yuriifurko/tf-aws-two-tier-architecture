@@ -20,7 +20,7 @@ stages:
 
   - echo -e "Assume role from development account"
   - set -- $(aws sts assume-role
-    --role-arn ${DEVELOP_IODC_ROLE_ARN}
+    --role-arn ${TERRAFORM_DEVELOP_ROLE_ARN}
     --role-session-name terraform-execution-full-access
     --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]'
     --output text)

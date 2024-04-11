@@ -3,7 +3,6 @@ stages:
   - auth
   - plan
   - build
-  - test
 
 .aws_auth: &aws_auth
   - echo "role - ${MASTER_IODC_ROLE_ARN}"
@@ -41,7 +40,7 @@ stages:
 
 checkov:
   # https://www.checkov.io/4.Integrations/GitLab%20CI.html
-  stage: test
+  stage: validate
   allow_failure: true  # True for AutoDevOps compatibility
   image:
     name: bridgecrew/checkov:latest
@@ -84,10 +83,10 @@ checkov:
 plan:
   stage: plan
   image:
-    name: docker:20
+    name: yuriyf/tf-aws-k8s:1.0.0
     entrypoint: [""]
   tags:
-    - plan
+    - terraform
   extends:
     - .auth_before_script
   script:

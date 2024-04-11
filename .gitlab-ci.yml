@@ -1,4 +1,5 @@
 stages:
+  - validate
   - auth
   - build
   - test
@@ -8,6 +9,7 @@ stages:
   GITLAB_ROLE_NAME: "oidc-provider/gitlab.com"
 
 .aws_auth: &aws_auth
+  - echo "role - ${MASTER_IODC_ROLE_ARN}"
   - >
     export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s"
     $(aws sts assume-role-with-web-identity

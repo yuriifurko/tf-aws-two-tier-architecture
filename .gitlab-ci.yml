@@ -75,7 +75,7 @@ stages:
 aws_auth:
   stage: auth
   image:
-    name: yuriyf/tf-aws-k8s:1.0.0
+    name: yuriyf/aws-terraform docker
     entrypoint: [""]
   id_tokens:
     ID_TOKEN_1:
@@ -88,7 +88,7 @@ aws_auth:
 plan:
   stage: plan
   image:
-    name: hashicorp/terraform-k8s
+    name: yuriyf/aws-terraform docker
     entrypoint: [""]
   # use tags for private gitlab-runner
   #tags:

@@ -31,6 +31,13 @@ stages:
   - export AWS_DEFAULT_REGION="us-east-1"
   - aws s3 ls
 
+.auth_before_script:
+  id_tokens:
+    ID_TOKEN_1:
+      aud: https://gitlab.com
+  before_script:
+    - *aws_auth
+
 checkov:
   # https://www.checkov.io/4.Integrations/GitLab%20CI.html
   stage: test
@@ -60,30 +67,27 @@ checkov:
     paths:
       - "checkov.test.xml"
 
-aws_auth:
-  stage: auth
-  image:
-    name: yuriyf/tf-aws-k8s:1.0.0
-    entrypoint: [""]
-  id_tokens:
-    ID_TOKEN_1:
-      aud: https://gitlab.com
-  script:
-    - *aws_auth
-  #rules:
-  #  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "schedule"
-
-# build:
-#   stage: build
+# aws_auth:
+#   stage: auth
 #   image:
-#     name: docker:20
+#     name: yuriyf/tf-aws-k8s:1.0.0
 #     entrypoint: [""]
-#   tags:
-#     - build
+#   id_tokens:
+#     ID_TOKEN_1:
+#       aud: https://gitlab.com
 #   script:
-#     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-#     - docker build -t ${CI_REGISTRY_IMAGE} .
-#     - docker push $CI_REGISTRY_IMAGE:latest
+#     - *aws_auth
+#   #rules:
+#   #  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "schedule"
 
-#     - docker tag $CI_REGISTRY_IMAGE $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-#     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+plan:
+  stage: plan
+  image:
+    name: docker:20
+    entrypoint: [""]
+  tags:
+    - plan
+  extends:
+    - .auth_before_script
+  script:
+    - terraform init --upgrade -migrate-state && terraform validate

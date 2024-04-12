@@ -35,7 +35,7 @@ jobs:
           aws sts get-caller-identity
           aws s3 ls
 
-      - name: Configure AWS devepment credentials
+      - name: Configure AWS development credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-east-1
@@ -72,4 +72,8 @@ jobs:
         id: tf_init
         run: |
           ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
+
+          aws configure set aws_access_key_id ${{ steps.master_iodc_creds.outputs.aws-access-key-id }} --profile administrator-access-041356085284
+          aws configure set aws_secret_access_key ${{ steps.master_iodc_creds.outputs.aws-secret-access-key }} --profile administrator-access-041356085284
+
           terraform init

@@ -69,7 +69,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
 
-      - name: Terraform init
+      - name: Configure aws profile and ssh key
         id: tf_init
         run: |
           ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
@@ -78,5 +78,18 @@ jobs:
           aws configure set aws_secret_access_key ${{ steps.master_iodc_creds.outputs.aws-secret-access-key }} --profile administrator-access-041356085284
           aws configure set aws_session_token ${{ steps.master_iodc_creds.outputs.aws-session-token }} --profile administrator-access-041356085284
 
-          terraform init --upgrade -migrate-state && terraform validate
+      - name: Terraform init
+        id: tf_init
+        run: |
+          terraform init --upgrade -migrate-state
+
+
+      - name: Terraform validate
+        id: tf_validate
+        run: |
+          terraform validate
+
+      - name: Terraform plan
+        id: tf_plan
+        run: |
           terraform plan

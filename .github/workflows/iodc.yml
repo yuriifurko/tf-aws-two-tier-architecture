@@ -67,8 +67,7 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
-        run: terraform init
 
-      # - name: Terraform init
-      #   id: tf_init
-      #   run: terraform init
+      - name: Terraform init
+        id: tf_init
+        run: terraform init

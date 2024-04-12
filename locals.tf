@@ -16,11 +16,11 @@ locals {
   }
 
   tags = {
-    Name          = local.project_name
-    Environment   = local.environment
-    OwnerFullName = "Yurii Furko"
-    OwnerEmail    = "yurii.furko@gmail.com"
-    ManagedBy     = "Terraform"
-    Department    = "DevOps"
+    Name        = local.project_name
+    Environment = local.environment
+    OwnerName   = "Yurii Furko"
+    OwnerEmail  = "yurii.furko@gmail.com"
+    ManagedBy   = "Terraform"
+    Department  = "DevOps"
   }
 }

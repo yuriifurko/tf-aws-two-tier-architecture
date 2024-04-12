@@ -59,7 +59,7 @@ jobs:
 
       - name: Terraform format
         id: tf_fmt
-        run: terraform fmt -check
+        run: terraform fmt -recursive -check
         continue-on-error: true
 
       - name: Bitbucket ssh key

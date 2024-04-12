@@ -2,6 +2,7 @@
 name: oidc
 
 env:
+  DIR: "."
   TF_VERSION: "1.8.0"
 
 on:
@@ -53,3 +54,16 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform format
+        id: tf_fmt
+        run: terraform fmt -check
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: ssh_key
+        working-directory: ${{ env.DIR }}
+        run: |
+          eval `ssh-agent -s`
+          ssh-add - <<< '${{ secrets.PRIVATE_SSH_KEY }}'
+          terraform init

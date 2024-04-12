@@ -67,8 +67,8 @@ jobs:
         working-directory: ${{ env.DIR }}
         env:
           PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          #  Copied from https://github.com/maddox/actions/blob/master/ssh/entrypoint.sh
         run: |
+          apt-get update -y && apt-get install openssh-client wget gnupg -y
           SSH_PATH="$HOME/.ssh"
 
           mkdir -p "$SSH_PATH"

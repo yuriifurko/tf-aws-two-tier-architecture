@@ -13,8 +13,8 @@ on:
       - master
 
 jobs:
-  Terraform:
-    name: check caller identity
+  terraform:
+    name: terraform
     permissions:
       contents: read
       id-token: write

@@ -83,3 +83,5 @@ jobs:
 
           eval $(ssh-agent)
           ssh-add "$SSH_PATH/id_rsa"
+
+          terraform init

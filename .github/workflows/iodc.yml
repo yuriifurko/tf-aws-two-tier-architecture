@@ -1,0 +1,25 @@
+---
+name: oidc
+
+on:
+  workflow_dispatch:
+
+jobs:
+  caller-identity:
+    name: check caller identity
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2.2.0
+      with:
+        aws-region: "us-east-1"
+        role-to-assume: ${{ secrets.MASTER_IODC_ROLE_ARN }}
+
+    - run: aws sts get-caller-identity
+
+    - run: aws s3 ls

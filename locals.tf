@@ -9,10 +9,10 @@ locals {
   environment  = "dev"
 
   account_mapping = {
-    mng:  041356085284
-    dev:  935454902317
-    qa:   111111111111
-    prod: 222222222222
+    mng  = 041356085284
+    dev  = 935454902317
+    qa   = 111111111111
+    prod = 222222222222
   }
 
   tags = {

@@ -43,6 +43,7 @@ jobs:
           aws-secret-access-key: ${{ steps.master_iodc_creds.outputs.aws-secret-access-key }}
           aws-session-token: ${{ steps.master_iodc_creds.outputs.aws-session-token }}
           role-to-assume: ${{ secrets.TERRAFORM_DEVELOP_ROLE_ARN }}
+          output-credentials: true
 
       - name: get caller identity
         run: |

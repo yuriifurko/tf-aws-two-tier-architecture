@@ -31,9 +31,9 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: us-east-1
-        aws-access-key-id: ${{ steps.creds.outputs.aws-access-key-id }}
-        aws-secret-access-key: ${{ steps.creds.outputs.aws-secret-access-key }}
-        aws-session-token: ${{ steps.creds.outputs.aws-session-token }}
+        aws-access-key-id: ${{ steps.master_iodc_creds.outputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ steps.master_iodc_creds.outputs.aws-secret-access-key }}
+        aws-session-token: ${{ steps.master_iodc_creds.outputs.aws-session-token }}
         role-to-assume: ${{ secrets.TERRAFORM_DEVELOP_ROLE_ARN }}
     - name: get caller identity
       run: |

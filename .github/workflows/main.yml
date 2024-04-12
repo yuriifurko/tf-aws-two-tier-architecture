@@ -4,7 +4,6 @@ env:
   AWS_REGION: "us-east-1"
   AWS_WEB_IDENTITY_TOKEN_FILE: "/tmp/web_identity_token_file"
   TF_VERSION: "1.8.0"
-  MASTER_IODC_ROLE_ARN: "arn:aws:iam::041356085284:role/identity-provider-github-assume-role"  # Replace
 
 "on":
   pull_request:
@@ -20,7 +19,7 @@ permissions:
 jobs:
   Terraform:
     name: Terraform
-    runs-on: docker.io/yuriyf/aws-terraform:1.0.1
+    runs-on: ubuntu-latest
     strategy:
       matrix: { dir: ['aws-accounts/tooling', 'aws-accounts/workload-prod-01'] }               # Replace, declare folder(s) to traverse
     #env:
@@ -29,17 +28,10 @@ jobs:
       - name: Get OIDC Token
         id: get_oidc_token
         run: |
-          export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s"
-          $(aws sts assume-role-with-web-identity
-          --role-arn ${MASTER_IODC_ROLE_ARN}
-          --role-session-name "GitLabRunner-${CI_PROJECT_ID}-${CI_PIPELINE_ID}"
-          --web-identity-token ${ID_TOKEN_1}
-          --duration-seconds 3600
-          --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]'
-          --output text))
-
-          aws sts get-caller-identity
-          aws s3 ls
+          curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' > /tmp/web_identity_token_file
+          mkdir ~/.aws
+          echo -e "[profile cicd]\nrole_arn=${AWS_ROLE_ARN}\nweb_identity_token_file=${AWS_WEB_IDENTITY_TOKEN_FILE}" >> ~/.aws/config
+          aws sts get-caller-identity --profile cicd
 
       - name: Checkout
         uses: actions/checkout@v3

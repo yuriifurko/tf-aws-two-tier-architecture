@@ -72,7 +72,7 @@ infracost breakdown --config-file=infracost.yml --format=table --out-file=infrac
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | n/a | `string` | `"t3a.micro"` | no |
+| <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | n/a | `string` | `null` | no |
 
 ## Outputs
 

@@ -58,6 +58,16 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
+      - name: Checkov GitHub Action
+        uses: bridgecrewio/checkov-action@v12.1347.0
+        with:
+          directory: "."
+          # Run scan on all checks but a specific check identifier (comma separated)
+          # skip_check: # optional
+          download_external_modules: false
+          quiet: true
+          soft_fail: true
+
       - name: Terraform format
         id: tf_fmt
         run: terraform fmt -recursive -check

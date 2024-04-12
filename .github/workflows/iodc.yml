@@ -70,4 +70,6 @@ jobs:
 
       - name: Terraform init
         id: tf_init
-        run: terraform init
+        run: |
+          ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
+          terraform init

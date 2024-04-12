@@ -20,7 +20,7 @@ permissions:
 jobs:
   Terraform:
     name: Terraform
-    runs-on: ubuntu-latest
+    runs-on: docker.io/yuriyf/aws-terraform:1.0.1
     strategy:
       matrix: { dir: ['aws-accounts/tooling', 'aws-accounts/workload-prod-01'] }               # Replace, declare folder(s) to traverse
     #env:

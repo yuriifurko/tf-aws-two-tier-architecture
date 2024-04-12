@@ -1,5 +1,5 @@
 ---
-name: oidc
+name: "Terraform CI/CD to AWS"
 
 env:
   DIR: "."
@@ -11,6 +11,7 @@ on:
   push:
     branches:
       - master
+
 jobs:
   caller-identity:
     name: check caller identity
@@ -28,6 +29,7 @@ jobs:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.MASTER_IODC_ROLE_ARN }}
           output-credentials: true
+
       - name: get caller identity
         run: |
           aws sts get-caller-identity
@@ -63,7 +65,21 @@ jobs:
       - name: Terraform Init
         id: ssh_key
         working-directory: ${{ env.DIR }}
+        env:
+          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          #  Copied from https://github.com/maddox/actions/blob/master/ssh/entrypoint.sh
         run: |
-          eval `ssh-agent -s`
-          ssh-add - <<< '${{ secrets.PRIVATE_SSH_KEY }}'
-          terraform init
+          SSH_PATH="$HOME/.ssh"
+
+          mkdir -p "$SSH_PATH"
+          touch "$SSH_PATH/known_hosts"
+
+          echo "$PRIVATE_KEY" > "$SSH_PATH/id_rsa"
+
+          chmod 700 "$SSH_PATH"
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          chmod 600 "$SSH_PATH/known_hosts"
+          chmod 600 "$SSH_PATH/id_rsa"
+
+          eval $(ssh-agent)
+          ssh-add "$SSH_PATH/id_rsa"

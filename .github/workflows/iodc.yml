@@ -77,4 +77,4 @@ jobs:
           aws configure set aws_secret_access_key ${{ steps.master_iodc_creds.outputs.aws-secret-access-key }} --profile administrator-access-041356085284
           aws configure set aws_session_token ${{ steps.master_iodc_creds.outputs.aws-session-token }} --profile administrator-access-041356085284
 
-          terraform init
+          terraform init --upgrade -migrate-state && terraform validate

@@ -5,15 +5,39 @@ env:
   DIR: "."
   TF_VERSION: "1.8.0"
 
+# There is a push event on the dev branch, or
+# There is a pull_request event on the dev branch, or
+# There is a manual trigger event (workflow_dispatch) on the dev branch
 on:
-  workflow_dispatch:
-  pull_request:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    branches:
+      - feature
 
 jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkov
+        uses: bridgecrewio/checkov-action@v12.1347.0
+        with:
+          directory: "."
+          # Run scan on all checks but a specific check identifier (comma separated)
+          # skip_check: # optional
+          download_external_modules: false
+          quiet: true
+          soft_fail: true
+
+
   terraform:
+    needs:
+      validate
     name: terraform
     permissions:
       contents: read
@@ -58,15 +82,6 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: Checkov
-        uses: bridgecrewio/checkov-action@v12.1347.0
-        with:
-          directory: "."
-          # Run scan on all checks but a specific check identifier (comma separated)
-          # skip_check: # optional
-          download_external_modules: false
-          quiet: true
-          soft_fail: true
 
       - name: Terraform format
         id: tf_fmt

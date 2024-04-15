@@ -1,0 +1,98 @@
+stages:
+  - validate
+  - auth
+  - plan
+  - build
+
+.aws_auth: &aws_auth
+  - echo "role - ${MASTER_IODC_ROLE_ARN}"
+  - >
+    export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s"
+    $(aws sts assume-role-with-web-identity
+    --role-arn ${MASTER_IODC_ROLE_ARN}
+    --role-session-name "GitLabRunner-${CI_PROJECT_ID}-${CI_PIPELINE_ID}"
+    --web-identity-token ${ID_TOKEN_1}
+    --duration-seconds 3600
+    --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]'
+    --output text))
+  - aws sts get-caller-identity
+  - aws s3 ls
+
+  - echo -e "Assume role from development account"
+  - set -- $(aws sts assume-role
+    --role-arn ${TERRAFORM_DEVELOP_ROLE_ARN}
+    --role-session-name terraform-execution-full-access
+    --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]'
+    --output text)
+
+  - export AWS_ACCESS_KEY_ID="$1"
+  - export AWS_SECRET_ACCESS_KEY="$2"
+  - export AWS_SESSION_TOKEN="$3"
+  - export AWS_DEFAULT_REGION="us-east-1"
+  - aws sts get-caller-identity
+  - aws s3 ls
+
+  - mkdir -p ~/.aws
+  - echo "${ID_TOKEN_1}" > /tmp/web_identity_token
+  - echo -e "[profile mng-administrator-access]\nrole_arn=${MASTER_IODC_ROLE_ARN}\nweb_identity_token_file=/tmp/web_identity_token" > ~/.aws/config
+
+.auth_before_script:
+  id_tokens:
+    ID_TOKEN_1:
+      aud: https://gitlab.com
+  before_script:
+    - *aws_auth
+
+checkov:
+  # https://www.checkov.io/4.Integrations/GitLab%20CI.html
+  stage: validate
+  allow_failure: true  # True for AutoDevOps compatibility
+  image:
+    name: bridgecrew/checkov:latest
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  rules:
+    - if: $SAST_DISABLED
+      when: never
+    - if: $CI_COMMIT_BRANCH
+      exists:
+        - '**/*.yml'
+        - '**/*.yaml'
+        - '**/*.json'
+        - '**/*.template'
+        - '**/*.tf'
+        - '**/serverless.yml'
+        - '**/serverless.yaml'
+  script:
+    - checkov -d . -o junitxml | tee checkov.test.xml
+  artifacts:
+    reports:
+      junit: "checkov.test.xml"
+    paths:
+      - "checkov.test.xml"
+
+aws_auth:
+  stage: auth
+  image:
+    name: docker.io/yuriyf/aws-terraform:1.0.1
+    entrypoint: [""]
+  id_tokens:
+    ID_TOKEN_1:
+      aud: https://gitlab.com
+  script:
+    - *aws_auth
+  #rules:
+  #  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+plan:
+  stage: plan
+  image:
+    name: docker.io/yuriyf/aws-terraform:1.0.1
+    entrypoint: [""]
+  extends:
+    - .auth_before_script
+  script:
+    - echo "Error Failed to download module. Need to add SSH"
+    #- terraform init --upgrade -migrate-state
+    #- terraform validate

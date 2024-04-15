@@ -1,0 +1,113 @@
+---
+name: "Terraform CI/CD to AWS"
+
+env:
+  DIR: "."
+  TF_VERSION: "1.8.0"
+
+# There is a push event on the dev branch, or
+# There is a pull_request event on the dev branch, or
+# There is a manual trigger event (workflow_dispatch) on the dev branch
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    branches:
+      - feature
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Terraform format
+        id: tf_fmt
+        run: terraform fmt -recursive -check
+        continue-on-error: true
+
+      - name: Checkov
+        uses: bridgecrewio/checkov-action@v12.1347.0
+        with:
+          directory: "."
+          # Run scan on all checks but a specific check identifier (comma separated)
+          # skip_check: # optional
+          download_external_modules: false
+          quiet: true
+          soft_fail: true
+
+      - name: Check linting of Terraform modules
+        uses: devops-infra/action-tflint@v0.3
+        with:
+          tflint_config: modules/.tflint.hcl
+          #dir_filter: "."
+
+  terraform:
+    needs:
+      validate
+    name: terraform
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+
+    steps:
+      # https://github.com/marketplace/actions/configure-aws-credentials-action-for-github-actions
+      - name: Configure AWS master credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        id: master_iodc_creds
+        with:
+          aws-region: us-east-1
+          role-to-assume: ${{ secrets.MASTER_IODC_ROLE_ARN }}
+          output-credentials: true
+
+      - name: Configure AWS development credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ steps.master_iodc_creds.outputs.aws-access-key-id }}
+          aws-secret-access-key: ${{ steps.master_iodc_creds.outputs.aws-secret-access-key }}
+          aws-session-token: ${{ steps.master_iodc_creds.outputs.aws-session-token }}
+          role-to-assume: ${{ secrets.TERRAFORM_DEVELOP_ROLE_ARN }}
+          output-credentials: true
+
+      # - name: get caller identity
+      #   run: |
+      #     aws sts get-caller-identity
+      #     aws s3 ls
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Bitbucket ssh key
+        id: ssh_key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
+
+      - name: Configure aws profile and ssh key
+        id: aws_profile
+        run: |
+          ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
+
+          aws configure set aws_access_key_id ${{ steps.master_iodc_creds.outputs.aws-access-key-id }} --profile mng-administrator-access
+          aws configure set aws_secret_access_key ${{ steps.master_iodc_creds.outputs.aws-secret-access-key }} --profile mng-administrator-access
+          aws configure set aws_session_token ${{ steps.master_iodc_creds.outputs.aws-session-token }} --profile mng-administrator-access
+
+      - name: Terraform init
+        id: tf_init
+        run: |
+          terraform init --upgrade -backend=false
+
+      - name: Terraform validate
+        id: tf_validate
+        run: |
+          terraform validate
